@@ -1,0 +1,20 @@
+{
+  "name": "resultspace-app",
+  "version": "1.0.0",
+  "description": "ResultSpace — packaged as a native Android app",
+  "main": "index.js",
+  "scripts": {
+    "sync": "npx cap copy android",
+    "open": "npx cap open android"
+  },
+  "author": "Tashrif",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/assets": "^3.0.0"
+  }
+}
