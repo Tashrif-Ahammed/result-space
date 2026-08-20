@@ -16,10 +16,29 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Release builds are signed with a persistent keystore (release.keystore) instead of the
+    // default debug key, which GitHub Actions would otherwise regenerate randomly on every run
+    // — breaking Google Sign-In (Firebase checks the signing SHA-1) and looking less trustworthy
+    // to Android/Play Protect than a consistently-signed, non-debuggable build. Credentials come
+    // from environment variables set via GitHub Secrets — see the workflow file.
+    signingConfigs {
+        release {
+            def ksPath = System.getenv("RELEASE_KEYSTORE_PATH")
+            if (ksPath != null) {
+                storeFile file(ksPath)
+                storePassword System.getenv("RELEASE_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword System.getenv("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (System.getenv("RELEASE_KEYSTORE_PATH") != null) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }

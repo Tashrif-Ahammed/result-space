@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "536632814058",
+    "project_id": "exam-space-b43af",
+    "storage_bucket": "exam-space-b43af.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:536632814058:android:0b482051cdafb326a5aa93",
+        "android_client_info": {
+          "package_name": "com.tashrif.resultspace"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "536632814058-8sigp1h281v1b9r9i57r5ak3tccqr0ot.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBo1qD9EZdSvKNWOqIpu5-i8vk7qFkQkGo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "536632814058-8sigp1h281v1b9r9i57r5ak3tccqr0ot.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
