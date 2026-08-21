@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "536632814058-h2v9u9ivdeu5hl448aiin0dphrknlnm5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tashrif.resultspace",
+            "certificate_hash": "7a45bc54dcad127fdb82dc134afdb798d909b27d"
+          }
+        },
+        {
           "client_id": "536632814058-8sigp1h281v1b9r9i57r5ak3tccqr0ot.apps.googleusercontent.com",
           "client_type": 3
         }

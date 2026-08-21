@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ResultSpace</title>
 <meta name="description" content="ResultSpace — track exam results, targets, and class performance from spreadsheets, with optional AI-assisted extraction.">
 <meta name="theme-color" content="#C8790F">
@@ -37,7 +37,11 @@
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.4);
   --shadow-lg: 0 16px 44px rgba(0,0,0,.5);
 }
-*{box-sizing:border-box;}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+/* Removes the ~300ms double-tap-zoom delay on interactive elements (the cause of taps feeling
+   slow/needing a repeat press) — the page itself is already locked from zooming via the viewport
+   meta tag, so no gesture is lost by disabling it per-element here too. */
+button, a, .nav-item, .fs-tab, select, input[type="checkbox"], input[type="radio"], [onclick]{touch-action:manipulation;}
 body{margin:0; background:var(--cream); color:var(--ink); font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight:500; display:flex; min-height:100vh; transition:background .25s, color .25s;}
 ::-webkit-scrollbar{width:8px; height:8px;} ::-webkit-scrollbar-thumb{background:var(--line); border-radius:8px;}
 
@@ -60,7 +64,7 @@ nav.navlist{display:flex; flex-direction:column; gap:3px; flex:1;}
 .main{flex:1; min-width:0; padding:26px 30px 90px; max-width:1240px;}
 /* Sheet tab: the table stretches edge-to-edge instead of sitting in a card-in-a-card. */
 .sheet-fullbleed{margin-left:-30px; margin-right:-30px; width:calc(100% + 60px);}
-.sheet-fullbleed .sheet-scroll-flat{border-left:none; border-right:none; border-radius:0; border-top:1px solid var(--line);}
+.sheet-fullbleed .sheet-scroll-flat{border-left:1px solid var(--line); border-right:1px solid var(--line); border-radius:0; border-top:1px solid var(--line);}
 .topbar{display:flex; justify-content:flex-start; align-items:center; margin-bottom:22px; gap:14px; flex-wrap:wrap;}
 .page-title{font-size:22px; font-weight:800; letter-spacing:-.01em;}
 .page-sub{font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
@@ -224,6 +228,9 @@ table.preview td{padding:7px 10px; border-bottom:1px solid var(--line); font-fam
 .fs-header{display:flex; align-items:center; gap:14px; padding:14px 24px; background:var(--card); border-bottom:1px solid var(--line); flex-shrink:0;}
 /* Classmate detail header only — kept slimmer than other fullscreen views per request. */
 #classmateDetailView .fs-header{padding:9px 24px;}
+/* Back button + name share one row here (unlike other fullscreen views, which need the title
+   on its own row for longer text) — only the "Compare with me" label and Delete button wrap. */
+#classmateDetailView .fs-header .fs-title{flex:1 1 auto; width:auto;}
 .fs-header .fs-title{font-size:16px; font-weight:800; flex:1;}
 .fs-back{display:flex; align-items:center; gap:6px; background:transparent; border:1px solid var(--line); border-radius:10px; padding:8px 14px; font-weight:700; font-size:13px; cursor:pointer; color:var(--ink);}
 .fs-back:hover{background:var(--cream-2);}
@@ -341,7 +348,7 @@ html, body{overscroll-behavior-y:none;}
 
 </style>
 </head>
-<body data-theme="light">
+<body data-theme="dark">
 <script>
   // Hide the native (Capacitor) splash screen the instant this page has painted its own
   // in-page splash below — the two look identical (same brand mark), so the handoff is
@@ -357,7 +364,11 @@ html, body{overscroll-behavior-y:none;}
 
 <!-- SPLASH (shown until we know whether there's a signed-in session, so refresh never flashes the login form) -->
 <div id="splashScreen" style="min-height:100vh; width:100%; display:flex; align-items:center; justify-content:center;">
-  <div class="brand-mark" style="width:56px; height:56px; font-size:22px;">R</div>
+  <!-- Sized as a percentage of the viewport (25vmin) and rounded at the same 29% ratio as the
+       native (pre-WebView) splash logo, so the handoff between the two is seamless — otherwise
+       this used to be a fixed 56px box next to the native splash's ~25%-of-screen logo, which
+       looked like two different icons popping in one after another. -->
+  <div class="brand-mark" style="width:25vmin; height:25vmin; font-size:10vmin; border-radius:29%;">R</div>
 </div>
 
 <!-- AUTH SCREEN -->
@@ -1325,6 +1336,7 @@ const WELCOME_TEXT = {
     manualLink: 'রোল নেই বা অন্যভাবে সেটআপ করতে চাও?',
     recognizedHelloNamed: name=> `✅ Recognized! হ্যালো, <b>${escapeHtml(name)}</b>`,
     recognizedHelloPlain: '✅ Recognized!',
+    recognizedDesc: 'তুমি EEE, ২৩ সিরিজ, সেকশন A থেকে — ডেভেলপার (তাসরিফ)-ও তোমার সেকশনেরই। তাই আগের ক্লাস টেস্ট থেকে একটা কুইক-স্টার্ট প্যাকেট রেডি আছে, যাতে তোমাকে সবকিছু নতুন করে টাইপ করতে না হয়।',
     continueBtn: 'Continue',
     cancelBtn: 'Cancel'
   },
@@ -1337,6 +1349,7 @@ const WELCOME_TEXT = {
     manualLink: "Don't have a roll, or want to set up manually?",
     recognizedHelloNamed: name=> `✅ Recognized! Hello, <b>${escapeHtml(name)}</b>`,
     recognizedHelloPlain: '✅ Recognized!',
+    recognizedDesc: "You're from EEE, 23 series, Section A — the developer (Tashrif) is from your section too. So here's a quick-start packet from the previous class tests, so you don't have to type everything from scratch.",
     continueBtn: 'Continue',
     cancelBtn: 'Cancel'
   }
@@ -1352,13 +1365,21 @@ function setWelcomeLang(lang){
   document.getElementById('welcomeCancelBtn').textContent = t.cancelBtn;
   document.getElementById('welcomeLangBn').className = lang==='bn' ? 'sm' : 'ghost sm';
   document.getElementById('welcomeLangEn').className = lang==='en' ? 'sm' : 'ghost sm';
+  // If the recognized card is already showing, re-render it in the newly selected language too
+  // — switching bn/en used to silently do nothing here, since this function never touched it.
+  if(welcomeRecognizedRoll && document.getElementById('welcomeRecognizedBox').style.display !== 'none'){
+    showWelcomeRecognized(welcomeRecognizedRoll, welcomeRecognizedName);
+  }
 }
 function openWelcome(){
   setWelcomeLang(welcomeLang);
   // Always (re)start at the roll-entry step, in case this is being shown again.
   clearTimeout(welcomeRollTimer);
+  welcomeRecognizedRoll = ''; welcomeRecognizedName = '';
   document.getElementById('welcomeRollInput').value = '';
   document.getElementById('welcomeRollStatus').textContent = '';
+  document.getElementById('welcomeTitle').style.display = '';
+  document.getElementById('welcomeDesc').style.display = '';
   document.getElementById('welcomeRollStep').style.display = '';
   document.getElementById('welcomeRecognizedBox').style.display = 'none';
   document.getElementById('welcomeContinueBtn').style.display = 'none';
@@ -1403,10 +1424,14 @@ async function recognizeWelcomeRoll(roll){
 function showWelcomeRecognized(roll, name){
   welcomeRecognizedRoll = roll; welcomeRecognizedName = name;
   const t = WELCOME_TEXT[welcomeLang];
+  // The "enter your roll number" title/desc no longer apply once we're past that step —
+  // leaving them showing above the recognized card was the leftover/illogical bit.
+  document.getElementById('welcomeTitle').style.display = 'none';
+  document.getElementById('welcomeDesc').style.display = 'none';
   document.getElementById('welcomeRollStep').style.display = 'none';
   const box = document.getElementById('welcomeRecognizedBox');
   const hello = name ? t.recognizedHelloNamed(name) : t.recognizedHelloPlain;
-  box.innerHTML = `<div style="font-size:15px; font-weight:800; margin-bottom:8px;">${hello}</div><div class="hint">${IMPORT_PROMPT_TEXT.desc}</div>`;
+  box.innerHTML = `<div style="font-size:15px; font-weight:800; margin-bottom:8px;">${hello}</div><div class="hint">${t.recognizedDesc}</div>`;
   box.style.display = '';
   document.getElementById('welcomeContinueBtn').style.display = '';
   document.getElementById('welcomeCancelBtn').style.display = '';
@@ -2263,7 +2288,7 @@ async function loadUserDataAndRenderApp(){
   targetsExpectations = storageGet('targetsExpectations') || {};
   const savedSettings = storageGet('settings'); settings = {myName:'', myRoll:'', courses:[], ...(savedSettings||{})};
   settings.courses = normalizeCoursesArray(settings.courses);
-  setTheme(storageGet('theme') || 'light');
+  setTheme(storageGet('theme') || 'dark');
   const savedPrompts = storageGet('devPrompts');
   if(savedPrompts){
     if(savedPrompts.classmate) CLASSMATE_PROMPT = savedPrompts.classmate;
@@ -2413,8 +2438,15 @@ window.addEventListener('DOMContentLoaded', async ()=>{
 })();
 
 function renderGreeting(){
-  const hour = new Date().getHours();
-  const part = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const now = new Date();
+  const hour = now.getHours();
+  const day = now.getDate(); // used only to rotate the phrasing daily, so it stays stable all day
+  let options;
+  if(hour < 5 || hour >= 21) options = ['Good night', "It's late night", 'Still up this late?'];
+  else if(hour < 12) options = ['Good morning', 'Rise and shine', 'Morning'];
+  else if(hour < 17) options = ['Good afternoon', 'Afternoon'];
+  else options = ['Good evening', 'Evening'];
+  const part = options[day % options.length];
   const name = settings.myName ? `, ${settings.myName}` : '';
   document.getElementById('greetingText').textContent = `${part}${name}`;
 }
