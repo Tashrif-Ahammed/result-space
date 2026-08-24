@@ -1932,23 +1932,26 @@ function toggleReauthPassVisibility(){
   btn.setAttribute('aria-label', btn.title);
 }
 function closeReauthModal(){ document.getElementById('reauthOverlay').classList.remove('open'); }
-// On native Android, Google sign-in goes through the classic GoogleSignInClient (via the
-// GoogleAuth plugin) — a real full-screen Activity, not a Credential-Manager overlay bottom
-// sheet. The overlay-based "One Tap" flow (the previous approach here) turned out to be
-// unreliable on some OEM Android skins (Oppo/ColorOS, Xiaomi/MIUI, etc.), which block or
-// swallow touches on floating system dialogs unless the person manually grants a
-// "display pop-up windows" permission — not something we can expect of every user. A real
-// Activity transition doesn't have that problem.
+// On native Android, Google sign-in goes through @capacitor-firebase/authentication's native
+// FirebaseAuthentication plugin (skipNativeAuth: true — it only runs the native picker and hands
+// back tokens; this JS/Firebase-Auth instance still does the actual sign-in). This replaced the
+// old @ironcode/capacitor-google-auth (alpha) flow: that plugin's account-picker card stopped
+// registering touches on some OEM Android builds (Oppo/ColorOS, Xiaomi/MIUI, etc.) once Google
+// Play Services started rendering it as a Credential-Manager bottom sheet under the hood — a
+// Google-side behavior change, not something fixable from app code while staying on that plugin.
+// @capacitor-firebase/authentication is maintained specifically to track that transition, so it
+// stays reliable across OEMs/Play-Services versions without needing a "display over other apps"
+// permission workaround.
 // Returns a Firebase credential built from the native ID token, or null in a plain browser tab
 // (where the existing signInWithPopup flow still works fine and callers should fall back to it).
 async function nativeGoogleCredential(){
   const Cap = window.Capacitor;
-  if(!(Cap && Cap.isNativePlatform && Cap.isNativePlatform() && Cap.Plugins && Cap.Plugins.GoogleAuth)) return null;
-  try{ await Cap.Plugins.GoogleAuth.initialize(); }catch(e){ /* already initialized, or config-only init — either way, safe to continue */ }
-  const result = await Cap.Plugins.GoogleAuth.signIn();
-  const idToken = result && result.authentication && result.authentication.idToken;
+  if(!(Cap && Cap.isNativePlatform && Cap.isNativePlatform() && Cap.Plugins && Cap.Plugins.FirebaseAuthentication)) return null;
+  const result = await Cap.Plugins.FirebaseAuthentication.signInWithGoogle();
+  const idToken = result && result.credential && result.credential.idToken;
+  const accessToken = result && result.credential && result.credential.accessToken;
   if(!idToken) throw new Error('No Google ID token returned by the native sign-in.');
-  return firebase.auth.GoogleAuthProvider.credential(idToken);
+  return firebase.auth.GoogleAuthProvider.credential(idToken, accessToken || null);
 }
 async function reauthWithGoogle(){
   const errBox = document.getElementById('reauthError');
@@ -2236,6 +2239,12 @@ async function authLogout(){
   const ok = await appConfirm('You will need to sign in again to access your data.', {title:'Log out?', confirmText:'Log out', danger:true});
   if(!ok) return;
   devLog('info', `Logged out (${currentUser ? currentUser.email : 'unknown'})`);
+  // Also clear the native Google session, otherwise the account picker can silently
+  // re-select the same cached account on next login instead of showing the chooser.
+  const Cap = window.Capacitor;
+  if(Cap && Cap.isNativePlatform && Cap.isNativePlatform() && Cap.Plugins && Cap.Plugins.FirebaseAuthentication){
+    try{ await Cap.Plugins.FirebaseAuthentication.signOut(); }catch(e){ /* not signed in natively, or plugin no-op — safe to ignore */ }
+  }
   auth.signOut();
 }
 

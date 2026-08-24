@@ -22,11 +22,6 @@
     "FirebaseAuthentication": {
       "skipNativeAuth": true,
       "providers": ["google.com"]
-    },
-    "GoogleAuth": {
-      "scopes": ["profile", "email"],
-      "serverClientId": "536632814058-8sigp1h281v1b9r9i57r5ak3tccqr0ot.apps.googleusercontent.com",
-      "forceCodeForRefreshToken": false
     }
   }
 }
