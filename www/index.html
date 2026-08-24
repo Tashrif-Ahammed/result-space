@@ -1932,16 +1932,21 @@ function toggleReauthPassVisibility(){
   btn.setAttribute('aria-label', btn.title);
 }
 function closeReauthModal(){ document.getElementById('reauthOverlay').classList.remove('open'); }
-// On native Android, Google sign-in goes through the OS's own Credential Manager (via the
-// FirebaseAuthentication plugin) instead of a WebView popup — the WebView popup flow is what
-// broke ("missing initial state" / sessionStorage errors) once this app was packaged as an APK.
+// On native Android, Google sign-in goes through the classic GoogleSignInClient (via the
+// GoogleAuth plugin) — a real full-screen Activity, not a Credential-Manager overlay bottom
+// sheet. The overlay-based "One Tap" flow (the previous approach here) turned out to be
+// unreliable on some OEM Android skins (Oppo/ColorOS, Xiaomi/MIUI, etc.), which block or
+// swallow touches on floating system dialogs unless the person manually grants a
+// "display pop-up windows" permission — not something we can expect of every user. A real
+// Activity transition doesn't have that problem.
 // Returns a Firebase credential built from the native ID token, or null in a plain browser tab
 // (where the existing signInWithPopup flow still works fine and callers should fall back to it).
 async function nativeGoogleCredential(){
   const Cap = window.Capacitor;
-  if(!(Cap && Cap.isNativePlatform && Cap.isNativePlatform() && Cap.Plugins && Cap.Plugins.FirebaseAuthentication)) return null;
-  const result = await Cap.Plugins.FirebaseAuthentication.signInWithGoogle();
-  const idToken = result && result.credential && result.credential.idToken;
+  if(!(Cap && Cap.isNativePlatform && Cap.isNativePlatform() && Cap.Plugins && Cap.Plugins.GoogleAuth)) return null;
+  try{ await Cap.Plugins.GoogleAuth.initialize(); }catch(e){ /* already initialized, or config-only init — either way, safe to continue */ }
+  const result = await Cap.Plugins.GoogleAuth.signIn();
+  const idToken = result && result.authentication && result.authentication.idToken;
   if(!idToken) throw new Error('No Google ID token returned by the native sign-in.');
   return firebase.auth.GoogleAuthProvider.credential(idToken);
 }

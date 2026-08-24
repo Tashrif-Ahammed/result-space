@@ -63,8 +63,13 @@ nav.navlist{display:flex; flex-direction:column; gap:3px; flex:1;}
 /* MAIN */
 .main{flex:1; min-width:0; padding:26px 30px 90px; max-width:1240px;}
 /* Sheet tab: the table stretches edge-to-edge instead of sitting in a card-in-a-card. */
-.sheet-fullbleed{margin-left:-30px; margin-right:-30px; width:calc(100% + 60px);}
-.sheet-fullbleed .sheet-scroll-flat{border-left:1px solid var(--line); border-right:1px solid var(--line); border-radius:0; border-top:1px solid var(--line);}
+/* The sheet container itself looks and feels like a card (matching the controls card above it),
+   instead of the earlier edge-to-edge full-bleed treatment — the border there wasn't reliably
+   visible on Android, and this reads more clearly as "a card holding the table" either way. */
+#sheetContainer{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px;}
+/* The inner table shouldn't have its own border/radius here — that's what created the
+   "card inside a card" look. #sheetContainer itself is the card; the table just fills it. */
+#sheetContainer .sheet-scroll-flat{border:none; border-radius:0;}
 .topbar{display:flex; justify-content:flex-start; align-items:center; margin-bottom:22px; gap:14px; flex-wrap:wrap;}
 .page-title{font-size:22px; font-weight:800; letter-spacing:-.01em;}
 .page-sub{font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
@@ -275,6 +280,11 @@ table.perf-table td:first-child, table.perf-table th:first-child{text-align:left
 .settings-jump-bar{display:flex; gap:8px; overflow-x:auto; padding:2px 2px 14px; margin-bottom:4px; position:sticky; top:0; background:var(--bg, var(--cream)); z-index:5; scrollbar-width:none;}
 .settings-jump-bar::-webkit-scrollbar{display:none;}
 .settings-jump-bar .chip{white-space:nowrap; flex-shrink:0;}
+.settings-jump-bar .chip.active{background:linear-gradient(135deg, var(--amber), var(--amber-deep)); color:var(--on-accent); border-color:transparent;}
+/* Settings behaves like tabs, not a single scrolling page — only the active section's card is
+   shown, the others stay fully hidden (not just scrolled past) until their chip is tapped. */
+[data-settings-panel]{display:none;}
+[data-settings-panel].active{display:block;}
 .settings-section{padding:20px 0; border-bottom:1px solid var(--line);}
 .settings-section:last-child{border-bottom:none;}
 .settings-section .settings-label{font-weight:800; font-size:14px; margin-bottom:10px; display:block;}
@@ -331,7 +341,7 @@ html, body{overscroll-behavior-y:none;}
   .sidebar.open{transform:translateX(0);}
   .hamburger{display:flex;}
   .main{padding:20px 16px 90px;}
-  .sheet-fullbleed{margin-left:-16px; margin-right:-16px; width:calc(100% + 32px);}
+  #sheetContainer{padding:14px;}
   .two-col{grid-template-columns:1fr;}
   .topbar{position:sticky; top:0; z-index:800; background:var(--cream); margin:-20px -16px 18px; padding:14px 16px; border-bottom:1px solid var(--line); justify-content:flex-start; text-align:left;}
   .topbar .page-title, .topbar .page-sub{text-align:left;}
@@ -545,7 +555,7 @@ html, body{overscroll-behavior-y:none;}
         <button class="ghost sm" id="sheetSortResetBtn" onclick="resetSheetSort()" style="display:none;">✕ Reset</button>
       </div>
     </div>
-    <div id="sheetContainer" class="sheet-fullbleed"></div>
+    <div id="sheetContainer"></div>
   </div>
 
   <!-- ADD EXAM -->
@@ -671,74 +681,77 @@ html, body{overscroll-behavior-y:none;}
   <!-- SETTINGS PAGE -->
   <div class="page" id="page-settings">
   <div class="settings-jump-bar" id="settingsJumpBar">
-    <span class="chip" onclick="document.getElementById('settingsNameRollSection').scrollIntoView({behavior:'smooth', block:'start'})">Profile</span>
-    <span class="chip" onclick="document.getElementById('settingsApiKeySection').scrollIntoView({behavior:'smooth', block:'start'})">API Key</span>
-    <span class="chip" onclick="document.getElementById('settingsCourseSection').scrollIntoView({behavior:'smooth', block:'start'})">Courses</span>
-    <span class="chip" onclick="document.getElementById('settingsAppearanceSection').scrollIntoView({behavior:'smooth', block:'start'})">Appearance</span>
-    <span class="chip" onclick="document.getElementById('settingsBackupSection').scrollIntoView({behavior:'smooth', block:'start'})">Backup</span>
-    <span class="chip" id="settingsJumpSync" style="display:none;" onclick="document.getElementById('settingsSectionSync').scrollIntoView({behavior:'smooth', block:'start'})">Section Sync</span>
-    <span class="chip" onclick="document.getElementById('settingsMoreSection').scrollIntoView({behavior:'smooth', block:'start'})">More</span>
+    <span class="chip" data-tab="profile" onclick="switchSettingsTab('profile')">Profile</span>
+    <span class="chip" data-tab="courses" onclick="switchSettingsTab('courses')">Courses</span>
+    <span class="chip" data-tab="backup" onclick="switchSettingsTab('backup')">Backup & Sync</span>
   </div>
-  <div class="card" id="settingsNameRollSection">
+  <div class="card" id="settingsNameRollSection" data-settings-panel="profile">
     <div class="card-title" style="margin-bottom:14px;">Profile</div>
     <div class="settings-section" style="padding-top:0;">
       <label class="settings-label" for="myNameInput">Your Name</label>
-      <input type="text" id="myNameInput" placeholder="Your name" oninput="saveMyInfo()">
+      <div class="row" style="gap:8px; flex-wrap:nowrap;">
+        <input type="text" id="myNameInput" placeholder="Your name" oninput="saveMyInfo()" style="flex:1;">
+        <button class="sm" onclick="advanceManualSetup()">Done</button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <label class="settings-label" for="myRollInput">Your Roll</label>
+      <div class="row" style="gap:8px; flex-wrap:nowrap;">
+        <input type="text" id="myRollInput" placeholder="e.g. 2301059" oninput="saveMyInfo()" style="flex:1;">
+        <button class="sm" onclick="advanceManualSetup()">Done</button>
+      </div>
+    </div>
+    <div class="settings-section" id="settingsApiKeySection">
+      <label class="settings-label" for="apiKeyInput">API Key</label>
+      <div class="row" style="gap:8px; flex-wrap:nowrap;">
+        <input type="password" id="apiKeyInput" placeholder="Paste key here" oninput="saveApiKey()" style="flex:1;">
+        <button class="sm" onclick="confirmApiKeyDone()">Done</button>
+      </div>
+      <div class="hint" style="margin-top:10px; background:var(--cream-2); border-radius:8px; padding:8px 10px; line-height:1.5;">
+        → <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:var(--amber-deep); font-weight:600;">Go to this link</a>, click <strong>Create API key</strong>, then copy the key and paste it here.
+      </div>
     </div>
     <div class="settings-section" style="border-bottom:none; padding-bottom:0;">
-      <label class="settings-label" for="myRollInput">Your Roll</label>
-      <input type="text" id="myRollInput" placeholder="e.g. 2301059" oninput="saveMyInfo()">
+      <label class="settings-label">Appearance</label>
+      <div class="row">
+        <button class="ghost sm" id="themeLightBtn" onclick="setTheme('light')">Light</button>
+        <button class="ghost sm" id="themeDarkBtn" onclick="setTheme('dark')">Dark</button>
+      </div>
     </div>
   </div>
 
-  <div class="card" id="settingsApiKeySection">
-    <div class="card-title" style="margin-bottom:14px;">API Key</div>
-    <input type="password" id="apiKeyInput" placeholder="Paste key here" oninput="saveApiKey()">
-    <div class="hint" style="margin-top:10px; background:var(--cream-2); border-radius:8px; padding:8px 10px; line-height:1.5;">
-      → <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:var(--amber-deep); font-weight:600;">Go to this link</a>, click <strong>Create API key</strong>, then copy the key and paste it here.
-    </div>
-  </div>
-
-  <div class="card" id="settingsCourseSection">
+  <div class="card" id="settingsCourseSection" data-settings-panel="courses">
     <div class="card-title" style="margin-bottom:14px;">Courses</div>
     <div class="hint" style="margin-bottom:8px;">The AI uses <b>Full Course Name</b>, <b>Course Code</b>, and <b>Keyword(s)</b> to recognize a course even when a result sheet only shows a code or a slightly different name (e.g. "EEE 2203" → matched to your course automatically). <b>Short Name</b> is what shows up everywhere else in the app — dashboard, sheet, charts. <b>Tip:</b> add the teacher's name to Keyword(s) too — result sheets often label a test by teacher rather than course.</div>
     <div id="courseChips"></div>
     <button class="sm" style="margin-top:10px;" onclick="addCourse()">+ Add Course</button>
   </div>
 
-  <div class="card" id="settingsAppearanceSection">
-    <div class="card-title" style="margin-bottom:14px;">Appearance</div>
-    <div class="row">
-      <button class="ghost sm" id="themeLightBtn" onclick="setTheme('light')">Light</button>
-      <button class="ghost sm" id="themeDarkBtn" onclick="setTheme('dark')">Dark</button>
+  <div class="card" id="settingsBackupSection" data-settings-panel="backup">
+    <div class="card-title" style="margin-bottom:14px;">Backup & Synchronization</div>
+    <div class="settings-section" style="padding-top:0;">
+      <label class="settings-label">Backup</label>
+      <div class="row">
+        <button class="ghost sm" onclick="exportState()">Export</button>
+        <button class="ghost sm" onclick="document.getElementById('importStateInput').click()">Import</button>
+        <input type="file" id="importStateInput" accept=".json" style="display:none" onchange="importState(this.files[0])">
+      </div>
     </div>
-  </div>
-
-  <div class="card" id="settingsBackupSection">
-    <div class="card-title" style="margin-bottom:14px;">Backup</div>
-    <div class="row">
-      <button class="ghost sm" onclick="exportState()">Export</button>
-      <button class="ghost sm" onclick="document.getElementById('importStateInput').click()">Import</button>
-      <input type="file" id="importStateInput" accept=".json" style="display:none" onchange="importState(this.files[0])">
+    <div class="settings-section" id="settingsSectionSync" style="display:none;">
+      <label class="settings-label">Section Sync</label>
+      <button class="ghost sm" onclick="openTashrifImportFromSettings()">
+        <span class="info-tip" data-tip="You're in the same section as the developer (EEE, 23 series, Section A). Tap to check Tashrif's shared exam data for anything new — exams, classmates, or courses — you don't have yet, and import just those.">📦 Import from Tashrif</span>
+      </button>
+      <label class="row" style="gap:6px; font-size:12.5px; font-weight:600; cursor:pointer; margin-top:10px;">
+        <input type="checkbox" id="autoImportTashrifToggle" checked onchange="toggleAutoImportTashrif()" style="width:auto;">
+        <span class="info-tip" data-tip="When checked, ResultSpace quietly checks Tashrif's shared data every time the app launches or is refreshed, and imports anything new automatically — no need to tap the button above.">Auto import on launch</span>
+      </label>
     </div>
-  </div>
-
-  <div class="card" id="settingsSectionSync" style="display:none;">
-    <div class="card-title" style="margin-bottom:14px;">Section Sync</div>
-    <button class="ghost sm" onclick="openTashrifImportFromSettings()">
-      <span class="info-tip" data-tip="You're in the same section as the developer (EEE, 23 series, Section A). Tap to check Tashrif's shared exam data for anything new — exams, classmates, or courses — you don't have yet, and import just those.">📦 Import from Tashrif</span>
-    </button>
-    <label class="row" style="gap:6px; font-size:12.5px; font-weight:600; cursor:pointer; margin-top:10px;">
-      <input type="checkbox" id="autoImportTashrifToggle" checked onchange="toggleAutoImportTashrif()" style="width:auto;">
-      <span class="info-tip" data-tip="When checked, ResultSpace quietly checks Tashrif's shared data every time the app launches or is refreshed, and imports anything new automatically — no need to tap the button above.">Auto import on launch</span>
-    </label>
-  </div>
-
-  <div class="card" id="settingsMoreSection">
-    <div class="card-title" style="margin-bottom:14px;">More</div>
-    <button class="ghost sm" style="width:100%; justify-content:center;" onclick="openDevConsole()">Developer Options →</button>
-    <div style="margin-top:12px; text-align:center;">
-      <button class="privacy-link-btn" onclick="openPrivacyPolicy()">Privacy Policy</button>
+    <div class="settings-section" style="border-bottom:none; padding-bottom:0;">
+      <button class="ghost sm" style="width:100%; justify-content:center;" onclick="openDevConsole()">Developer Options →</button>
+      <div style="margin-top:12px; text-align:center;">
+        <button class="privacy-link-btn" onclick="openPrivacyPolicy()">Privacy Policy</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1332,11 +1345,10 @@ const WELCOME_TEXT = {
     desc: 'শুরু করতে তোমার রোল নাম্বারটা দাও।',
     rollPlaceholder: 'যেমন 2301059',
     checking: 'চেক করা হচ্ছে…',
-    notRecognized: 'এই রোল চেনা যায়নি — চলো ম্যানুয়ালি সেটআপ করি।',
     manualLink: 'রোল নেই বা অন্যভাবে সেটআপ করতে চাও?',
     recognizedHelloNamed: name=> `✅ Recognized! হ্যালো, <b>${escapeHtml(name)}</b>`,
     recognizedHelloPlain: '✅ Recognized!',
-    recognizedDesc: 'তুমি EEE, ২৩ সিরিজ, সেকশন A থেকে — ডেভেলপার (তাসরিফ)-ও তোমার সেকশনেরই। তাই আগের ক্লাস টেস্ট থেকে একটা কুইক-স্টার্ট প্যাকেট রেডি আছে, যাতে তোমাকে সবকিছু নতুন করে টাইপ করতে না হয়।',
+    recognizedDesc: 'তুমি EEE, ২৩ সিরিজ, সেকশন A থেকে — ডেভেলপার (তাশরীফ)-ও তোমার সেকশনেরই। তাই আগের ক্লাস টেস্ট থেকে একটা কুইক-স্টার্ট প্যাকেট রেডি আছে, যাতে তোমাকে সবকিছু নতুন করে টাইপ করতে না হয়।',
     continueBtn: 'Continue',
     cancelBtn: 'Cancel'
   },
@@ -1345,7 +1357,6 @@ const WELCOME_TEXT = {
     desc: 'To get started, enter your roll number.',
     rollPlaceholder: 'e.g. 2301059',
     checking: 'Checking…',
-    notRecognized: "Roll not recognized — let's set you up manually.",
     manualLink: "Don't have a roll, or want to set up manually?",
     recognizedHelloNamed: name=> `✅ Recognized! Hello, <b>${escapeHtml(name)}</b>`,
     recognizedHelloPlain: '✅ Recognized!',
@@ -1401,8 +1412,9 @@ function onWelcomeRollInput(){
   statusEl.textContent = '';
   if(!/^\d{7}$/.test(val)) return; // wait for a complete 7-digit roll before doing anything
   if(!isEligibleRoll(val)){
-    statusEl.textContent = t.notRecognized;
-    welcomeRollTimer = setTimeout(()=> goToManualSetupFromWelcome(val), 1200);
+    // No "not recognized" announcement — just quietly move to manual setup, same as before,
+    // but without calling attention to the fact the roll didn't match anything.
+    welcomeRollTimer = setTimeout(()=> goToManualSetupFromWelcome(val), 400);
     return;
   }
   statusEl.textContent = t.checking;
@@ -1475,10 +1487,12 @@ function goToSettingsFromWelcome(){
   showNameRollCoachmark(); // first thing new users should do is tell us who they are
 }
 function showNameRollCoachmark(){
+  switchSettingsTab('profile'); // this coachmark points at a field that only exists on this tab
   const text = welcomeLang==='bn' ? 'প্রথমে এখানে তোমার নাম ও রোল নাম্বার দাও 👇' : "First, enter your name and roll number here 👇";
   pointCoachmarkAt('settingsNameRollSection', text);
 }
 function showCoachmark(){
+  switchSettingsTab('courses'); // ditto — Courses tab has to actually be visible to point at it
   const text = welcomeLang==='bn' ? 'এখানে ক্লিক করে তোমার কোর্স যোগ করো 👇' : 'Click here to add your courses 👇';
   pointCoachmarkAt('settingsCourseSection', text);
 }
@@ -1918,16 +1932,21 @@ function toggleReauthPassVisibility(){
   btn.setAttribute('aria-label', btn.title);
 }
 function closeReauthModal(){ document.getElementById('reauthOverlay').classList.remove('open'); }
-// On native Android, Google sign-in goes through the OS's own Credential Manager (via the
-// FirebaseAuthentication plugin) instead of a WebView popup — the WebView popup flow is what
-// broke ("missing initial state" / sessionStorage errors) once this app was packaged as an APK.
+// On native Android, Google sign-in goes through the classic GoogleSignInClient (via the
+// GoogleAuth plugin) — a real full-screen Activity, not a Credential-Manager overlay bottom
+// sheet. The overlay-based "One Tap" flow (the previous approach here) turned out to be
+// unreliable on some OEM Android skins (Oppo/ColorOS, Xiaomi/MIUI, etc.), which block or
+// swallow touches on floating system dialogs unless the person manually grants a
+// "display pop-up windows" permission — not something we can expect of every user. A real
+// Activity transition doesn't have that problem.
 // Returns a Firebase credential built from the native ID token, or null in a plain browser tab
 // (where the existing signInWithPopup flow still works fine and callers should fall back to it).
 async function nativeGoogleCredential(){
   const Cap = window.Capacitor;
-  if(!(Cap && Cap.isNativePlatform && Cap.isNativePlatform() && Cap.Plugins && Cap.Plugins.FirebaseAuthentication)) return null;
-  const result = await Cap.Plugins.FirebaseAuthentication.signInWithGoogle();
-  const idToken = result && result.credential && result.credential.idToken;
+  if(!(Cap && Cap.isNativePlatform && Cap.isNativePlatform() && Cap.Plugins && Cap.Plugins.GoogleAuth)) return null;
+  try{ await Cap.Plugins.GoogleAuth.initialize(); }catch(e){ /* already initialized, or config-only init — either way, safe to continue */ }
+  const result = await Cap.Plugins.GoogleAuth.signIn();
+  const idToken = result && result.authentication && result.authentication.idToken;
   if(!idToken) throw new Error('No Google ID token returned by the native sign-in.');
   return firebase.auth.GoogleAuthProvider.credential(idToken);
 }
@@ -2451,15 +2470,43 @@ function renderGreeting(){
   document.getElementById('greetingText').textContent = `${part}${name}`;
 }
 
-function saveApiKey(){ clearTimeout(apiKeySaveTimer); apiKeySaveTimer = setTimeout(()=> storageSet('apiKey', document.getElementById('apiKeyInput').value.trim()), 500); checkImportEligibility(); maybeHintNextStep(); }
+function saveApiKey(){ clearTimeout(apiKeySaveTimer); apiKeySaveTimer = setTimeout(()=> storageSet('apiKey', document.getElementById('apiKeyInput').value.trim()), 500); }
 function getApiKey(){ return document.getElementById('apiKeyInput').value.trim(); }
+// Persists name+roll as the person types, but doesn't trigger the "what's next" guidance —
+// that only fires from the Done buttons now (advanceManualSetup), not on every keystroke.
 function saveMyInfo(){
   settings.myName = document.getElementById('myNameInput').value.trim();
   settings.myRoll = document.getElementById('myRollInput').value.trim();
   storageSet('settings', settings);
   refreshAllViews(); renderGreeting();
   updateSectionSyncVisibility();
+}
+// Called by the Done button next to Name or Roll. Always re-checks from the top: prompts for
+// whichever of Name/Roll is still missing, one at a time, and only once both are in does it
+// move on to checking recognition / hinting the next field (API key, then Courses).
+function advanceManualSetup(){
+  saveMyInfo();
+  if(!settings.myName){
+    toast(welcomeLang==='bn' ? 'আগে তোমার নাম লেখো।' : 'Enter your name first.');
+    document.getElementById('myNameInput').focus();
+    return;
+  }
+  if(!settings.myRoll){
+    toast(welcomeLang==='bn' ? 'এখন তোমার রোল নাম্বার দাও 👇' : 'Now enter your roll number 👇');
+    document.getElementById('myRollInput').focus();
+    return;
+  }
   checkImportEligibility();
+  maybeHintNextStep();
+}
+// Called by the Done button next to the API key field.
+function confirmApiKeyDone(){
+  clearTimeout(apiKeySaveTimer);
+  storageSet('apiKey', document.getElementById('apiKeyInput').value.trim());
+  if(!getApiKey()){
+    toast(welcomeLang==='bn' ? 'আগে তোমার API Key বসাও।' : 'Paste your API key first.');
+    return;
+  }
   maybeHintNextStep();
 }
 // Guides a first-time (non-eligible-roll) user through setup one step at a time: once name +
@@ -2473,6 +2520,7 @@ function maybeHintNextStep(){
     if(settings.apiKeyHintSeen) return;
     settings.apiKeyHintSeen = true;
     storageSet('settings', settings);
+    switchSettingsTab('profile'); // API key field lives on this tab
     const text = welcomeLang==='bn' ? 'এখন এখানে তোমার Gemini API Key বসাও 👇' : 'Now paste your Gemini API key here 👇';
     toast(welcomeLang==='bn' ? 'এখন তোমার API Key বসাও' : 'Now add your API key');
     pointCoachmarkAt('settingsApiKeySection', text);
@@ -2566,6 +2614,13 @@ function setTheme(t){
   renderDashboard();
 }
 function openSettings(){ switchPage('settings'); }
+// Settings behaves like tabs: only one of Profile/Courses/Backup & Sync is visible at a time,
+// the others are fully hidden (display:none) rather than just scrolled past.
+function switchSettingsTab(tab){
+  document.querySelectorAll('#settingsJumpBar .chip').forEach(c=> c.classList.toggle('active', c.dataset.tab===tab));
+  document.querySelectorAll('[data-settings-panel]').forEach(p=> p.classList.toggle('active', p.dataset.settingsPanel===tab));
+  window.scrollTo(0, 0);
+}
 function closeSettings(){}
 
 function openPrivacyPolicy(){
@@ -2644,6 +2699,7 @@ async function switchPage(name){
   document.getElementById('pageSub').textContent = PAGE_META[name].sub;
   closeSidebar();
   window.scrollTo(0, 0); // always open a tab from the top, never mid-scroll from wherever it last was
+  if(name === 'settings') switchSettingsTab('profile'); // always land on the same tab first
   if(name === 'analysis'){
     if(selectedExamIds.size===0 && exams.length){ selectedExamIds.add(exams[exams.length-1].id); }
     renderExamChips();
