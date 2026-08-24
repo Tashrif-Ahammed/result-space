@@ -19,12 +19,6 @@
 			"splashFullScreen": true,
 			"splashImmersive": false
 		},
-		"FirebaseAuthentication": {
-			"skipNativeAuth": true,
-			"providers": [
-				"google.com"
-			]
-		},
 		"GoogleAuth": {
 			"scopes": [
 				"profile",

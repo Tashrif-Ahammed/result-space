@@ -9,10 +9,10 @@ android {
 
 apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
-    implementation project(':capacitor-firebase-authentication')
     implementation project(':capacitor-filesystem')
     implementation project(':capacitor-share')
     implementation project(':capacitor-splash-screen')
+    implementation project(':ironcode-capacitor-google-auth')
 
 }
 
