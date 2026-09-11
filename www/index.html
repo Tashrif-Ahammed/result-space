@@ -25,9 +25,11 @@
   --shadow-lg: 0 12px 40px rgba(43,31,20,.14);
   --radius:16px; --radius-sm:10px; --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
   --on-accent:#fff;
+  --waste-accent: color-mix(in srgb, var(--err) 85%, black);
 }
 [data-theme="dark"]{
   --on-accent:#1A1006;
+  --waste-accent: color-mix(in srgb, var(--err) 70%, black);
   --cream:#15120E; --cream-2:#1E1913; --cream-3:#2A2318;
   --amber:#E0A040; --amber-deep:#F0B85A; --amber-soft:#C8790F;
   --ink:#F3E9D8; --ink-soft:#CBB89A; --ink-faint:#7A6B54;
@@ -222,6 +224,41 @@ table.preview td{padding:7px 10px; border-bottom:1px solid var(--line); font-fam
 .rank-score{font-family:var(--mono); font-weight:800; color:var(--amber-deep);}
 .you-tag{font-size:9.5px; font-weight:800; background:var(--amber); color:#fff; padding:1px 6px; border-radius:8px; margin-left:6px;}
 .delta-tag{font-size:11px; font-family:var(--mono); color:var(--ink-faint); min-width:48px; text-align:right;}
+
+
+/* CLASS TEST STATISTICS */
+.cts-course-tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;scrollbar-width:none;}
+.cts-course-tabs::-webkit-scrollbar{display:none;}
+.cts-course-tab{white-space:nowrap;flex:0 0 auto;}
+.cts-course-tab.active{background:var(--amber);color:#fff;border-color:var(--amber);}
+.cts-course-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;max-width:760px;}
+.cts-course-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;}
+.cts-course-name{font-size:16px;font-weight:800;color:var(--amber-deep);}
+.cts-row{padding:11px 0;border-top:1px solid var(--line);}
+.cts-row-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px;}
+.cts-mark{font-family:var(--mono);font-weight:800;color:var(--amber-deep);}
+.cts-status{font-size:10px;font-weight:800;color:var(--ink-faint);}
+.cts-slider{width:100%;padding:0;border:none;box-shadow:none;accent-color:var(--amber);}
+.cts-slider:focus{box-shadow:none;border:none;}
+.cts-fixed-slider{opacity:.6;pointer-events:none;}
+.cts-fixed-slider.cts-slider-waste{opacity:1;}
+.cts-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:7px;}
+.cts-lock{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:none;letter-spacing:0;margin:0;}
+.cts-final{margin-top:14px;padding:14px;border-radius:12px;background:var(--cream-2);}
+.cts-final-head{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.cts-final-value{font-family:var(--mono);font-size:18px;font-weight:900;color:var(--amber-deep);display:flex;gap:7px;align-items:baseline;flex-wrap:wrap;}
+.cts-equivalent{font-family:inherit;font-size:14px;font-weight:700;color:var(--ink-faint);}
+.cts-raw-part{font-size:14px;font-weight:700;color:var(--ink-soft);}
+.cts-equiv-part{font-size:26px;font-weight:900;color:var(--amber-deep);}
+.cts-slider-waste{accent-color:var(--waste-accent);}
+.cts-final-controls{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.cts-target-readout{font-family:var(--mono);font-size:11px;font-weight:800;color:var(--ink-soft);margin-right:auto;}
+.cts-final-track{position:relative;margin:10px 0 4px;}
+.cts-final-track input{margin:0;}
+.cts-target-box{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);}
+.cts-target-result{font-size:11.5px;color:var(--ink-soft);margin-top:6px;}
+.cts-buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.update-card{width:420px;max-width:100%;}
 
 /* MODAL */
 .modal-overlay{position:fixed; inset:0; background:#00000055; backdrop-filter:blur(2px); display:none; align-items:center; justify-content:center; z-index:2600; animation:fadeIn .15s; padding:20px;}
@@ -455,6 +492,10 @@ html, body{overscroll-behavior-y:none;}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
       Analysis
     </button>
+    <button class="nav-item" data-page="ctstats" onclick="switchPage('ctstats')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M7 15l3-4 3 2 4-6"/><circle cx="7" cy="15" r="1"/><circle cx="10" cy="11" r="1"/><circle cx="13" cy="13" r="1"/><circle cx="17" cy="7" r="1"/></svg>
+      CT Statistics
+    </button>
   </nav>
   <div class="sidebar-foot">
     <button class="nav-item" data-page="settings" onclick="switchPage('settings')">
@@ -543,7 +584,11 @@ html, body{overscroll-behavior-y:none;}
     <div class="card">
       <div class="card-head">
         <div class="searchbar"><input type="text" id="sheetSearch" placeholder="Search roll or name" oninput="renderSheet()"></div>
-        <button class="ghost sm" onclick="downloadCSV()">Export CSV</button>
+        <div class="row" style="gap:6px;">
+          <button class="ghost sm" onclick="downloadCSV()">CSV</button>
+          <button class="ghost sm" onclick="downloadXLSX()">XLS</button>
+          <button class="ghost sm" onclick="exportSheetPDF()">PDF</button>
+        </div>
       </div>
       <div class="hint" style="margin-bottom:10px;">Click a column header to sort. Click a mark to edit it. Highlighted cells need a quick check — hover and tap ✓ to confirm.</div>
       <div class="row" style="gap:10px; flex-wrap:wrap;">
@@ -678,6 +723,16 @@ html, body{overscroll-behavior-y:none;}
     </div>
   </div>
 
+
+  <!-- CLASS TEST STATISTICS -->
+  <div class="page" id="page-ctstats">
+    <div class="card" style="padding:14px 16px;">
+      <div class="card-title" style="margin-bottom:10px;">Choose your course</div>
+      <div id="ctCourseTabs" class="cts-course-tabs"></div>
+    </div>
+    <div id="ctStatsGrid"></div>
+  </div>
+
   <!-- SETTINGS PAGE -->
   <div class="page" id="page-settings">
   <div class="settings-jump-bar" id="settingsJumpBar">
@@ -755,6 +810,20 @@ html, body{overscroll-behavior-y:none;}
     </div>
   </div>
 </div>
+</div>
+
+
+<!-- APP UPDATE MODAL -->
+<div class="modal-overlay" id="appUpdateOverlay">
+  <div class="modal update-card">
+    <div class="modal-title">✨ New update available</div>
+    <div class="hint" id="appUpdateMessage" style="font-size:13px;line-height:1.6;margin-bottom:16px;">A newer ResultSpace version is ready.</div>
+    <div class="row">
+      <button onclick="acceptAppUpdate()">Accept update</button>
+      <button class="ghost" onclick="document.getElementById('appUpdateOverlay').classList.remove('open')">Later</button>
+    </div>
+    <div class="hint" style="margin-top:10px;">A JSON backup is exported automatically before updating.</div>
+  </div>
 </div>
 
 <!-- REVIEW DETECTED EXAMS MODAL -->
@@ -1310,6 +1379,38 @@ db.settings({ignoreUndefinedProperties:true});
 // Keeps the app usable offline / on flaky connections — writes queue locally and sync when back online.
 db.enablePersistence({synchronizeTabs:true}).catch(()=>{});
 
+/* App update check: publish appMeta/resultspace in Firestore with {latestVersion, message, updateUrl}.
+   The prompt is intentionally delayed until the user has been inside the app for 5 seconds. */
+const APP_VERSION = '1.1.0';
+let pendingAppUpdate = null;
+function versionParts(v){ return String(v||'0').split('.').map(x=>parseInt(x,10)||0); }
+function isVersionNewer(remote,local){
+  const a=versionParts(remote), b=versionParts(local), n=Math.max(a.length,b.length);
+  for(let i=0;i<n;i++){ if((a[i]||0)>(b[i]||0)) return true; if((a[i]||0)<(b[i]||0)) return false; }
+  return false;
+}
+async function checkForAppUpdateAfterDelay(){
+  setTimeout(async ()=>{
+    if(!currentUser) return;
+    try{
+      const snap=await db.collection('appMeta').doc('resultspace').get();
+      const meta=snap.exists ? (snap.data()||{}) : null;
+      if(!meta || !isVersionNewer(meta.latestVersion,APP_VERSION)) return;
+      pendingAppUpdate=meta;
+      document.getElementById('appUpdateMessage').textContent=meta.message || `ResultSpace ${meta.latestVersion} is available.`;
+      document.getElementById('appUpdateOverlay').classList.add('open');
+    }catch(e){ devLog('info','Update check skipped',e.message); }
+  },5000);
+}
+function acceptAppUpdate(){
+  // Safety first: export a portable backup before handing off to the new build.
+  exportState();
+  document.getElementById('appUpdateOverlay').classList.remove('open');
+  const url=pendingAppUpdate?.updateUrl;
+  setTimeout(()=>{ if(url) location.href=url; else location.reload(); },250);
+}
+
+
 let currentUser = null;
 let justSignedUp = false;
 let welcomeLang = 'bn';
@@ -1709,6 +1810,8 @@ function toggleAutoImportTashrif(){
   const box = document.getElementById('autoImportTashrifToggle');
   settings.autoImportTashrif = box.checked;
   storageSet('settings', settings);
+  // Turning it ON should mean ON now, not only after the next relaunch.
+  if(box.checked) autoImportTashrifSilently();
 }
 async function autoImportTashrifSilently(){
   if(!currentUser || currentUser.email === TASHRIF_EMAIL) return;
@@ -2254,6 +2357,7 @@ auth.onAuthStateChanged(async (user)=>{
     document.getElementById('authUserEmail').textContent = user.email || '';
     await loadUserDataAndRenderApp();
     await revealScreen(splash, document.getElementById('appShell'), 'flex');
+    checkForAppUpdateAfterDelay();
     if(justSignedUp){ justSignedUp = false; openWelcome(); }
   }else{
     currentUser = null;
@@ -2681,6 +2785,7 @@ const PAGE_META = {
   addexam:{title:'Add Exam', sub:'Upload a result file'},
   students:{title:'Classmates', sub:'Manage roll and name records'},
   analysis:{title:'Analysis', sub:'Ranking and statistics'},
+  ctstats:{title:'CT Statistics', sub:'Class test planner'},
   settings:{title:'Settings', sub:'Account, courses, and preferences'}
 };
 function toggleSidebar(){
@@ -2706,6 +2811,7 @@ async function switchPage(name){
     computeAnalysis();
   }
   if(name === 'dashboard') renderDashboard();
+  if(name === 'ctstats') renderCtStatistics();
 }
 
 /* ============================= UTILS ============================= */
@@ -4577,6 +4683,29 @@ function downloadCSV(){
   rows.forEach(([roll,name])=>{ csv += `${roll},"${(name||'').replace(/"/g,'""')}",` + exams.map(ex=> ex.marks[roll]?.value ?? '').join(',') + '\n'; });
   downloadText(csv, 'master_sheet.csv', 'Your sheet data is downloaded successfully.');
 }
+
+function downloadXLSX(){
+  const rows = Array.from(allRollsMap().entries()).sort((a,b)=> a[0].localeCompare(b[0], undefined, {numeric:true}));
+  const data = [['Roll','Name',...exams.map(e=>e.name)]];
+  rows.forEach(([roll,name])=> data.push([roll,name||'',...exams.map(ex=> ex.marks[roll]?.value ?? '')]));
+  try{
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Results');
+    XLSX.writeFile(wb, 'master_sheet.xlsx');
+    toast('Your XLS file is downloaded successfully.');
+  }catch(e){ toast('Could not create XLS file'); devLog('error','XLS export failed',e.message); }
+}
+function exportSheetPDF(){
+  const rows = Array.from(allRollsMap().entries()).sort((a,b)=> a[0].localeCompare(b[0], undefined, {numeric:true}));
+  const th = ['Roll','Name',...exams.map(e=>e.name)].map(x=>`<th>${escapeHtml(x)}</th>`).join('');
+  const body = rows.map(([roll,name])=>`<tr><td>${escapeHtml(roll)}</td><td>${escapeHtml(name||'')}</td>${exams.map(ex=>`<td>${ex.marks[roll]?.value ?? ''}</td>`).join('')}</tr>`).join('');
+  const w = window.open('', '_blank');
+  if(!w){ toast('Please allow pop-ups to export PDF'); return; }
+  w.document.write(`<!doctype html><html><head><title>ResultSpace Sheet</title><style>body{font-family:Arial,sans-serif;padding:22px;color:#111}h1{font-size:20px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #bbb;padding:5px;text-align:center}th{background:#eee}@page{size:landscape;margin:10mm}</style></head><body><h1>ResultSpace — Master Sheet</h1><table><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table><script>window.onload=()=>setTimeout(()=>window.print(),150)<\/script></body></html>`);
+  w.document.close();
+}
+
 function exportState(){ downloadText(JSON.stringify({students, exams, settings, targetsExpectations, exportedAt:new Date().toISOString()}, null, 2), 'resultspace_backup.json', 'Your backup is downloaded successfully.'); }
 function importState(file){
   if(!file) return;
@@ -4988,6 +5117,203 @@ function computeComebackRows(lastExam){
 }
 function allRollsMapArray(){ return Array.from(allRollsMap().entries()).map(([roll,name])=>({roll,name})); }
 
+
+/* ============================= CLASS TEST STATISTICS ============================= */
+let ctSimulations = {};
+let ctSelectedCourse = '';
+function ctRound(v){ return Math.round(Number(v)); }
+function ctGrant(raw){ return raw==null ? null : Math.min(20, Math.ceil(Number(raw)-1e-9)); }
+function jsQuote(value){ return String(value ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function ctCourseNums(course){ return [1,2,3,4]; }
+function ctActualMark(course,ct){
+  const ex=exams.find(e=>e.course===course && Number(e.ctNumber)===Number(ct));
+  const v=ex?.marks?.[settings.myRoll]?.value;
+  return (v===null||v===undefined||Number.isNaN(Number(v)))?null:Number(v);
+}
+function ensureCtSimulation(course){
+  if(!ctSimulations[course])ctSimulations[course]={values:{},locks:{},targetRaw:null};
+  const sim=ctSimulations[course];
+  ctCourseNums(course).forEach(ct=>{
+    const actual=ctActualMark(course,ct);
+    if(actual!=null){sim.values[ct]=ctRound(actual);sim.locks[ct]=true;}
+    else if(sim.values[ct]==null){
+      const te=getTE(course,ct);
+      sim.values[ct]=Math.max(0,Math.min(20,ctRound(te.target ?? te.expectation ?? 15)));
+      sim.locks[ct]=false;
+    }
+  });
+  return sim;
+}
+function ctOutcome(course){
+  const sim=ensureCtSimulation(course);
+  const vals=ctCourseNums(course).map(ct=>Number(sim.values[ct])).filter(Number.isFinite);
+  if(!vals.length)return {raw:null,granted:null,best:[]};
+  const best=[...vals].sort((a,b)=>b-a).slice(0,3);
+  const raw=best.reduce((a,b)=>a+b,0)/best.length;
+  return {raw,granted:ctGrant(raw),best};
+}
+function ctUnlocked(course){
+  const sim=ensureCtSimulation(course);
+  return ctCourseNums(course).filter(ct=>ctActualMark(course,ct)==null&&!sim.locks[ct]);
+}
+function ctMaxRaw(course){
+  const sim=ensureCtSimulation(course), unlocked=ctUnlocked(course), old={};
+  unlocked.forEach(ct=>{old[ct]=sim.values[ct];sim.values[ct]=20;});
+  const max=ctOutcome(course).raw??0;
+  unlocked.forEach(ct=>{sim.values[ct]=old[ct];});
+  return max;
+}
+function ctFindCombination(course,target,mode){
+  const sim=ensureCtSimulation(course), unlocked=ctUnlocked(course);
+  if(!unlocked.length)return null;
+  const current=unlocked.map(ct=>Number(sim.values[ct]??0));
+  let best=null;
+  const vals=new Array(unlocked.length);
+  const evaluate=()=>{
+    unlocked.forEach((ct,i)=>sim.values[ct]=vals[i]);
+    const raw=ctOutcome(course).raw??0;
+    const sum=vals.reduce((a,b)=>a+b,0);
+    const mean=sum/vals.length;
+    const variance=vals.reduce((a,b)=>a+(b-mean)*(b-mean),0);
+    const movement=vals.reduce((a,b,i)=>a+Math.abs(b-current[i]),0);
+    if(mode==='minimum'){
+      // In this mode `target` is the desired FINAL/GRANTED mark (an integer the teacher would
+      // actually write down), not the raw best-3 average. Teachers only ever round a fractional
+      // average UP to the next whole number, so any raw value that already lands in the
+      // (target-1, target] bucket satisfies the goal — we must not additionally demand
+      // raw>=target, or we'd force marks that are higher than truly necessary.
+      if(ctGrant(raw)<target)return;
+      const score=[sum,variance,movement];
+      if(!best||score.some((v,i)=>v<best.score[i]-1e-9 && score.slice(0,i).every((x,j)=>Math.abs(x-best.score[j])<1e-9)))best={vals:[...vals],score,raw};
+    }else{
+      const score=[Math.abs(raw-target),variance,movement];
+      if(!best||score.some((v,i)=>v<best.score[i]-1e-9 && score.slice(0,i).every((x,j)=>Math.abs(x-best.score[j])<1e-9)))best={vals:[...vals],score,raw};
+    }
+  };
+  function walk(i){
+    if(i===vals.length){evaluate();return;}
+    for(let v=0;v<=20;v++){vals[i]=v;walk(i+1);}
+  }
+  walk(0);
+  return best;
+}
+function applyCtCombo(course,result){
+  if(!result)return;
+  const sim=ensureCtSimulation(course), unlocked=ctUnlocked(course);
+  unlocked.forEach((ct,i)=>{sim.values[ct]=result.vals[i];});
+}
+function renderCtCourseTabs(courses){
+  const box=document.getElementById('ctCourseTabs');if(!box)return;
+  if(!courses.length){box.innerHTML='';return;}
+  if(!ctSelectedCourse||!courses.includes(ctSelectedCourse))ctSelectedCourse=courses[0];
+  box.innerHTML=courses.map(c=>`<button class="ghost sm cts-course-tab ${c===ctSelectedCourse?'active':''}" onclick="selectCtCourse('${jsQuote(c)}')">${escapeHtml(c)}</button>`).join('');
+}
+function selectCtCourse(course){ctSelectedCourse=course;renderCtStatistics();}
+function setCtSimValue(course,ct,value){
+  const sim=ensureCtSimulation(course);
+  if(ctActualMark(course,ct)!=null||sim.locks[ct])return;
+  sim.values[ct]=Math.max(0,Math.min(20,ctRound(value)));
+  const o=ctOutcome(course);
+  sim.targetRaw=o.raw;
+  updateCtCourseLive(course);
+}
+function setCtLock(course,ct,checked){ensureCtSimulation(course).locks[ct]=!!checked;updateCtCourseLive(course);}
+function setCtFinal(course,value){
+  const sim=ensureCtSimulation(course);
+  const max=ctMaxRaw(course);
+  const target=Math.max(0,Math.min(max,Number(value)));
+  sim.targetRaw=target;
+  const result=ctFindCombination(course,target,'closest');
+  if(result)applyCtCombo(course,result);
+  else sim.targetRaw=ctOutcome(course).raw;
+  updateCtCourseLive(course);
+}
+function solveCtTarget(course){
+  const sim=ensureCtSimulation(course);
+  // Whatever raw value the slider/readout is currently sitting at, what actually matters to the
+  // student is the FINAL mark the teacher will write down — i.e. its rounded-up (granted)
+  // equivalent. "Find minimum" solves for that final mark, not for the literal raw decimal, so
+  // dragging the slider anywhere inside e.g. (18, 19] all mean the same target: a final 19.
+  const currentRaw=Number(sim.targetRaw==null?(ctOutcome(course).raw??0):sim.targetRaw);
+  const targetGrant=ctGrant(currentRaw);
+  const unlocked=ctUnlocked(course);
+  if(!unlocked.length){
+    if(targetGrant>ctGrant(ctOutcome(course).raw??0))toast('Unlock a CT to reach this final mark');
+    return;
+  }
+  const maxRaw=ctMaxRaw(course);
+  const maxGrant=ctGrant(maxRaw);
+  if(targetGrant>maxGrant){sim.targetRaw=maxRaw;toast('Maximum possible mark reached');updateCtCourseLive(course);return;}
+  const result=ctFindCombination(course,targetGrant,'minimum');
+  if(result){applyCtCombo(course,result);sim.targetRaw=result.raw;}
+  updateCtCourseLive(course);
+}
+function addCtSimulationToTarget(course){
+  const sim=ensureCtSimulation(course);let count=0;
+  ctCourseNums(course).forEach(ct=>{
+    if(ctActualMark(course,ct)!=null)return;
+    const key=teKey(course,ct),current=targetsExpectations[key]||{target:null,expectation:null};
+    current.target=ctRound(sim.values[ct]);targetsExpectations[key]=current;count++;
+  });
+  storageSet('targetsExpectations',targetsExpectations);renderDashboard();toast(count?`${count} CT target${count!==1?'s':''} saved`:'No upcoming CT');
+}
+function updateCtCourseLive(course){
+  const root=document.getElementById('ctActiveCard');if(!root||course!==ctSelectedCourse)return;
+  const o=ctOutcome(course),sim=ensureCtSimulation(course),max=ctMaxRaw(course);
+  const droppedSet=new Set(ctCourseNums(course).map(ct=>({ct,val:Number(sim.values[ct]??0)})).sort((a,b)=>b.val-a.val).slice(3).map(x=>x.ct));
+  root.querySelectorAll('[data-ct-val]').forEach(el=>{const ct=Number(el.dataset.ctVal);el.textContent=Number(sim.values[ct]??0);});
+  root.querySelectorAll('[data-ct-slider]').forEach(el=>{
+    const ct=Number(el.dataset.ctSlider);
+    el.value=Number(sim.values[ct]??0);
+    const fixed=ctActualMark(course,ct)!=null,locked=!fixed&&!!sim.locks[ct],disableSlider=fixed||locked;
+    // Keep sliders natively enabled (see renderCtStatistics note) so accent-color/waste-red
+    // isn't overridden by the browser's disabled-control theme; pointer-events:none does the
+    // actual locking via the cts-fixed-slider class.
+    el.disabled=false;
+    el.classList.toggle('cts-fixed-slider',disableSlider);
+    el.toggleAttribute('aria-disabled',disableSlider);
+    el.tabIndex=disableSlider?-1:0;
+    el.classList.toggle('cts-slider-waste',droppedSet.has(ct));
+  });
+  const raw=root.querySelector('[data-raw-value]');if(raw)raw.textContent=o.raw==null?'—':o.raw.toFixed(2);
+  const eq=root.querySelector('[data-equiv-value]');if(eq)eq.textContent=o.granted==null?'—':o.granted;
+  const final=root.querySelector('[data-final-slider]');if(final){final.max=Math.max(0,max).toFixed(2);final.value=Math.min(Number(sim.targetRaw??o.raw??0),max).toFixed(2);}
+  const target=root.querySelector('[data-final-target]');if(target)target.textContent=Number(sim.targetRaw??o.raw??0).toFixed(2);
+}
+function renderCtStatistics(){
+  const grid=document.getElementById('ctStatsGrid'),courses=coursesInUse();if(!grid)return;
+  if(!settings.myRoll){grid.innerHTML='<div class="card"><div class="empty-state">Set your roll number in Settings first.</div></div>';return;}
+  if(!courses.length){grid.innerHTML='<div class="card"><div class="empty-state">No courses yet.</div></div>';return;}
+  renderCtCourseTabs(courses);
+  const course=ctSelectedCourse,sim=ensureCtSimulation(course),o=ctOutcome(course);
+  if(sim.targetRaw==null)sim.targetRaw=o.raw??0;
+  const droppedSet=new Set(ctCourseNums(course).map(ct=>({ct,val:Number(sim.values[ct]??0)})).sort((a,b)=>b.val-a.val).slice(3).map(x=>x.ct));
+  const rows=ctCourseNums(course).map(ct=>{
+    const actual=ctActualMark(course,ct),fixed=actual!=null,val=Number(sim.values[ct]??0);
+    const locked=!fixed&&!!sim.locks[ct],disableSlider=fixed||locked,isWaste=droppedSet.has(ct);
+    // Note: we intentionally do NOT set the native `disabled` attribute on this slider.
+    // Disabled range inputs get repainted by the browser's own "disabled control" theme in many
+    // browsers, which silently overrides accent-color — that's what was wiping out the red
+    // "wasted CT" highlight whenever a slider was fixed/locked. pointer-events:none (via the
+    // cts-fixed-slider class) blocks dragging just as well while keeping our own colors intact.
+    return `<div class="cts-row"><div class="cts-row-head"><b>Class Test ${ct}</b><span class="cts-mark" data-ct-val="${ct}">${val}</span></div>
+      <input class="cts-slider ${disableSlider?'cts-fixed-slider':''} ${isWaste?'cts-slider-waste':''}" type="range" min="0" max="20" step="1" value="${val}" data-ct-slider="${ct}" ${disableSlider?'aria-disabled="true" tabindex="-1"':''} oninput="setCtSimValue('${jsQuote(course)}',${ct},this.value)">
+      ${!fixed?`<div class="cts-controls"><label class="cts-lock"><input type="checkbox" style="width:auto" ${sim.locks[ct]?'checked':''} onchange="setCtLock('${jsQuote(course)}',${ct},this.checked)">Keep fixed</label></div>`:''}
+    </div>`;
+  }).join('');
+  const max=ctMaxRaw(course),hasUpcoming=ctUnlocked(course).length>0;
+  grid.innerHTML=`<div class="cts-course-card" id="ctActiveCard">
+    <div class="cts-course-head"><div class="cts-course-name">${escapeHtml(course)}</div></div>
+    ${rows}
+    <div class="cts-final">
+      <div class="cts-final-head"><b>Final Mark</b><span class="cts-final-value"><span class="cts-raw-part" data-raw-value>${o.raw==null?'—':o.raw.toFixed(2)}</span> <span class="cts-equivalent">≈</span> <span class="cts-equiv-part" data-equiv-value>${o.granted==null?'—':o.granted}</span></span></div>
+      <div class="cts-final-track"><input class="cts-slider" data-final-slider type="range" min="0" max="${Math.max(0,max).toFixed(2)}" step="1" value="${Math.min(Number(sim.targetRaw??o.raw??0),max).toFixed(2)}" ${hasUpcoming?'':'disabled'} oninput="setCtFinal('${jsQuote(course)}',this.value)"></div>
+      <div class="cts-final-controls"><span class="cts-target-readout" data-final-target>${Number(sim.targetRaw??o.raw??0).toFixed(2)}</span><button class="ghost sm" ${hasUpcoming?'':'disabled'} onclick="solveCtTarget('${jsQuote(course)}')">Find minimum</button><button class="sm" ${hasUpcoming?'':'disabled'} onclick="addCtSimulationToTarget('${jsQuote(course)}')">Add to Target</button></div>
+    </div>
+  </div>`;
+}
+function resetCtSimulations(){ctSimulations={};renderCtStatistics();}
+
 /* ============================= ANALYSIS (reactive) ============================= */
 function renderExamChips(){
   const box = document.getElementById('examChipList');
@@ -5039,7 +5365,8 @@ function computeAnalysis(){
   lastAnalysis = {examStats, rankRows, selExams};
   renderAnalysis(lastAnalysis);
   populateChartSelectors(selExams, rankRows);
-  document.getElementById('chartsRow').style.display = 'grid';
+  // A single selected exam already has its full statistics above; trend/distribution graphs only add value for multi-exam comparison.
+  document.getElementById('chartsRow').style.display = selectedExamIds.size > 1 ? 'grid' : 'none';
 }
 function renderAnalysis({examStats, rankRows}){
   const out = document.getElementById('statsOutput');
