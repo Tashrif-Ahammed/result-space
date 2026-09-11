@@ -2046,12 +2046,21 @@ function closeReauthModal(){ document.getElementById('reauthOverlay').classList.
 // (where the existing signInWithPopup flow still works fine and callers should fall back to it).
 async function nativeGoogleCredential(){
   const Cap = window.Capacitor;
-  if(!(Cap && Cap.isNativePlatform && Cap.isNativePlatform() && Cap.Plugins && Cap.Plugins.GoogleAuth)) return null;
+  if(!(Cap && Cap.isNativePlatform && Cap.isNativePlatform() && Cap.Plugins && Cap.Plugins.GoogleAuth)){
+    devLog('info', 'nativeGoogleCredential: not on native platform or plugin missing — falling back to popup');
+    return null;
+  }
   try{ await Cap.Plugins.GoogleAuth.initialize(); }catch(e){ /* already initialized, or config-only init — either way, safe to continue */ }
-  const result = await Cap.Plugins.GoogleAuth.signIn();
-  const idToken = result && result.authentication && result.authentication.idToken;
-  if(!idToken) throw new Error('No Google ID token returned by the native sign-in.');
-  return firebase.auth.GoogleAuthProvider.credential(idToken);
+  try{
+    const result = await Cap.Plugins.GoogleAuth.signIn();
+    const idToken = result && result.authentication && result.authentication.idToken;
+    if(!idToken) throw new Error('No Google ID token returned by native sign-in (result='+JSON.stringify(result)+'). Check SHA-1 / google-services.json / OAuth consent.');
+    devLog('info', 'nativeGoogleCredential: got ID token');
+    return firebase.auth.GoogleAuthProvider.credential(idToken);
+  }catch(e){
+    devLog('error', 'nativeGoogleCredential: signIn() failed', e.message || e.code || String(e));
+    throw e; // let caller show friendly message with real error (DEVELOPER_ERROR etc.)
+  }
 }
 async function reauthWithGoogle(){
   const errBox = document.getElementById('reauthError');
@@ -2301,12 +2310,17 @@ async function authForgotPassword(){
 async function authGoogleSignIn(){
   const errBox = document.getElementById('authError');
   errBox.textContent = '';
+  // On Android WebView popup is guaranteed to fail — don't even try it. Show native error directly.
+  const isNative = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
   try{
     let result;
     const nativeCred = await nativeGoogleCredential();
     if(nativeCred){
       result = await auth.signInWithCredential(nativeCred);
     }else{
+      if(isNative){
+        throw {code:'auth/internal-error', message:'Native Google Sign-In failed to start. Check SHA-1 in Firebase Console matches your APK (see logcat: DEVELOPER_ERROR = SHA mismatch).'};
+      }
       const provider = new firebase.auth.GoogleAuthProvider();
       result = await auth.signInWithPopup(provider);
     }
@@ -2331,9 +2345,17 @@ function friendlyAuthError(e){
     'auth/too-many-requests':'Too many attempts — try again later.',
     'auth/popup-closed-by-user':'Google sign-in was cancelled.',
     'auth/popup-blocked':'Popup was blocked by the browser — allow popups and try again.',
-    'auth/operation-not-supported-in-this-environment':'Google sign-in is not supported here — use email/password instead.'
+    'auth/operation-not-supported-in-this-environment':'Google sign-in is not supported here — use email/password instead.',
+    'auth/network-request-failed':'Network error — check your internet connection and try again.',
+    'auth/internal-error':'Google sign-in failed internally — check logcat for details.'
   };
-  return map[e.code] || (e.message || 'Something went wrong.');
+  if(map[e.code]) return map[e.code];
+  // Native Google Auth errors (DEVELOPER_ERROR code 10, 12500, etc. are not auth/*) — show real message so root cause is visible
+  if(e.message && /DEVELOPER_ERROR|12500|10:|ApiException/i.test(e.message)){
+    return 'Google Sign-In failed (DEVELOPER_ERROR). SHA-1 mismatch between APK and Firebase. Re-check google-services.json. Details: ' + e.message;
+  }
+  if(e.code) return e.code + ': ' + (e.message || 'Something went wrong.');
+  return e.message || 'Something went wrong.';
 }
 async function authLogout(){
   const ok = await appConfirm('You will need to sign in again to access your data.', {title:'Log out?', confirmText:'Log out', danger:true});

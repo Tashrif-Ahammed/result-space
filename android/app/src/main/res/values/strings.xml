@@ -4,4 +4,5 @@
     <string name="title_activity_main">ResultSpace</string>
     <string name="package_name">com.tashrif.resultspace</string>
     <string name="custom_url_scheme">com.tashrif.resultspace</string>
+    <string name="server_client_id">536632814058-8sigp1h281v1b9r9i57r5ak3tccqr0ot.apps.googleusercontent.com</string>
 </resources>
