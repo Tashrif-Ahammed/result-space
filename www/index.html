@@ -2052,12 +2052,22 @@ async function nativeGoogleCredential(){
   }
   try{ await Cap.Plugins.GoogleAuth.initialize(); }catch(e){ /* already initialized, or config-only init — either way, safe to continue */ }
   try{
+    // Force account chooser every time: clear cached account so Google shows the
+    // black account picker sheet instead of auto-signing in with the last account.
+    // Without this, if the phone has 2+ Google accounts, the user never gets a choice.
+    try{ await Cap.Plugins.GoogleAuth.signOut(); }catch(e){}
     const result = await Cap.Plugins.GoogleAuth.signIn();
     const idToken = result && result.authentication && result.authentication.idToken;
     if(!idToken) throw new Error('No Google ID token returned by native sign-in (result='+JSON.stringify(result)+'). Check SHA-1 / google-services.json / OAuth consent.');
     devLog('info', 'nativeGoogleCredential: got ID token');
     return firebase.auth.GoogleAuthProvider.credential(idToken);
   }catch(e){
+    // User cancelled the picker -> don't show scary error, treat as cancel
+    if(e && (e.message && /cancel/i.test(e.message) || e.code==='12501' || e.code==='popup-closed-by-user')){
+      const cancelErr = new Error('Google sign-in was cancelled.');
+      cancelErr.code = 'auth/popup-closed-by-user';
+      throw cancelErr;
+    }
     devLog('error', 'nativeGoogleCredential: signIn() failed', e.message || e.code || String(e));
     throw e; // let caller show friendly message with real error (DEVELOPER_ERROR etc.)
   }
