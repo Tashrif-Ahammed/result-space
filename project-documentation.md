@@ -106,14 +106,30 @@ git push origin main
 | uncommitted/untracked ফাইল অবশিষ্ট | `git status --porcelain` খালি |
 | `deploy-pages.yml` encoding | বৈধ UTF-8 (em-dash = `E2 80 94`) |
 | push | `git ls-remote origin` দিয়ে remote HEAD যাচাই |
+| Build APK workflow | run #32 ও #33 — দুটোই **success** |
+| Deploy web app (Pages) | run #1 — **success**; সাইট লাইভ: <https://tashrif-ahammed.github.io/result-space/> |
+| `app-debug.apk` | 6,366,561 bytes, 522 entries, signed (`META-INF/CERT.RSA`), 4 dex |
+| `app-release.apk` | 4,920,253 bytes, 523 entries, signed (`META-INF/CERT.RSA`), 2 dex |
+| APK-এর `assets/capacitor.config.json` | `server.url` = Pages URL, `server.errorPath` = `offline.html` — দুটো APK-তেই যাচাই করা |
+
+### APK ডাউনলোড
+
+| ফাইল | লিংক |
+| --- | --- |
+| Debug APK (run #33) | <https://github.com/Tashrif-Ahammed/result-space/actions/runs/36448486096> → artifact `resultspace-debug-apk` |
+| Release APK (run #33) | <https://github.com/Tashrif-Ahammed/result-space/actions/runs/36448486096> → artifact `resultspace-release-apk` |
+
+লোকালাল কপি: `safe/result-space-apk/resultspace-debug-apk/app-debug.apk` ও
+`safe/result-space-apk/resultspace-release-apk/app-release.apk`।
+GitHub artifact ৯০ দিন পর expire হয়, তাই দীর্ঘমেয়াদে GitHub **Release**-এ আপলোড করা ভালো।
 
 ## ৯. পরবর্তী ধাপ (অসম্পন্ন)
 
-- [ ] GitHub repo → **Settings → Pages → Source: GitHub Actions** সেলেক্ট করতে হবে,
-      নইলে `deploy-pages.yml` ফেইল করবে।
+- [x] GitHub repo → **Settings → Pages → Source: GitHub Actions** — Pages deploy সফল,
+      তাই এটি আগে থেকেই সেট করা ছিল।
 - [ ] Firebase Console → Authentication → **Authorized domains**-এ
       `<username>.github.io` যোগ করতে হবে, নইলে Google Sign-In ব্যর্থ হবে।
-- [ ] Actions থেকে **Build APK** একবার চালিয়ে নতুন (Pages-লিংকড) APK ইনস্টল করতে হবে।
+- [x] Actions থেকে **Build APK** চালিয়ে Pages-লিংকড APK বানানো হয়েছে — ফোনে ইনস্টল করতে হবে।
 - [ ] Play Store রিলিজের জন্য signed AAB + keystore এখনো বানানো হয়নি।
 
 ## ১০. জানা সমস্যা
