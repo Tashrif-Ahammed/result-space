@@ -8,7 +8,7 @@
 | --- | --- |
 | সোর্স আর্কাইভ | `result-space-main.zip` (workspace root, 2,345,937 bytes) |
 | আর্কাইভের ভেতরের রুট | `result-space-main/` |
-| ফাইল সংখ্যা | 98 |
+| ফাইল সংখ্যা | 97 |
 | টার্গেট রিপো | https://github.com/Tashrif-Ahammed/result-space |
 | ব্রাঞ্চ | `main` |
 | আপডেটের আগের বেস কমিট | `4dd34ed` — *fix(android): force Google account chooser on every login* |

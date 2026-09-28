@@ -41,7 +41,7 @@ result-space/
 ## ৪. ডেটা উৎস
 
 - সোর্স: `C:\Users\lenovo\OneDrive\Documents\Default Project\result-space-main.zip`
-- আর্কাইভে 98টি ফাইল, root ফোল্ডার `result-space-main/`।
+- আর্কাইভে 97টি ফাইল, root ফোল্ডার `result-space-main/`।
 - প্রতিটি ফাইলের path/size/SHA-256 তালিকা: [`data/file-inventory.tsv`](data/file-inventory.tsv)
 - বিস্তারিত: [`data/README.md`](data/README.md)
 
@@ -102,7 +102,7 @@ git push origin main
 | পরীক্ষা | ফলাফল |
 | --- | --- |
 | `www/index.html` ↔ `android/app/src/main/assets/public/index.html` | SHA-256 সমান — Capacitor sync যাচাই সফল |
-| zip-এর ৯৮টি ফাইল রিপোতে আছে | `git ls-files` দিয়ে যাচাই (ফলাফল নিচে) |
+| zip-এর ৯৭টি ফাইল রিপোতে আছে | `git ls-files` দিয়ে যাচাই — ০টি ফাইল অনুপস্থিত |
 | uncommitted/untracked ফাইল অবশিষ্ট | `git status --porcelain` খালি |
 | `deploy-pages.yml` encoding | বৈধ UTF-8 (em-dash = `E2 80 94`) |
 | push | `git ls-remote origin` দিয়ে remote HEAD যাচাই |
