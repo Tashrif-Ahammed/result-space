@@ -1,3 +1,20 @@
+# ResultSpace
+
+## ⚡ অটো-আপডেট: `www/` এ push করলেই সব ইউজারের অ্যাপ আপডেট
+
+- `www/index.html` পরিবর্তন করে `main` branch-এ push করো।
+- `Deploy web app (GitHub Pages)` workflow অটো চলে নতুন HTML লাইভ করে দেয় (~১ মিনিট)।
+- ইনস্টল করা APK এখন এই লাইভ সাইট থেকে অ্যাপ লোড করে, তাই ইউজাররা পরের বার অ্যাপ খুললেই নতুন ভার্সন পায় — নতুন APK লাগে না।
+- অফলাইনে শেষ লোড হওয়া ভার্সন চলে (`www/sw.js`)।
+- APK নতুন করে বিল্ড হয় শুধু native/config ফাইল বদলালে (বা Actions থেকে ম্যানুয়ালি চালালে)।
+
+### একবারের সেটআপ
+1. GitHub repo → **Settings → Pages → Source: GitHub Actions** সিলেক্ট করো।
+2. Firebase Console → Authentication → Settings → **Authorized domains**-এ `<তোমার-username>.github.io` যোগ করো।
+3. Actions ট্যাব থেকে **Build APK** একবার চালাও, নতুন APK একবার ইনস্টল করো। (পুরনো ইউজারদের এই একবারই নতুন APK দিতে হবে।)
+
+---
+
 # ResultSpace — Android App (Capacitor project, ready to build)
 
 ## সবচেয়ে সহজ উপায়: GitHub Actions দিয়ে অনলাইনে APK বানানো (Android Studio লাগবে না)

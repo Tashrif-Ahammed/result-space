@@ -2,6 +2,9 @@ name: Build APK
 on:
   push:
     branches: [ main ]
+    # HTML-only changes are delivered through the Pages deploy (deploy-pages.yml), so they don't
+    # need a new APK. The APK only rebuilds when native/config files change, or when run manually.
+    paths-ignore: [ 'www/**', 'README.md' ]
   workflow_dispatch:
 jobs:
   build:
@@ -15,6 +18,15 @@ jobs:
           node-version: '20'
       - name: Install dependencies
         run: npm install
+      # Makes the APK a thin shell that loads the live site from GitHub Pages, so future HTML
+      # pushes reach every installed app without reinstalling. URL is derived from the repo itself.
+      - name: Point app at GitHub Pages
+        run: |
+          OWNER="${GITHUB_REPOSITORY_OWNER,,}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          PAGES_URL="https://${OWNER}.github.io/${REPO}/"
+          echo "App will load from: $PAGES_URL"
+          PAGES_URL="$PAGES_URL" node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('capacitor.config.json'));c.server={...c.server,url:process.env.PAGES_URL,errorPath:'offline.html'};fs.writeFileSync('capacitor.config.json',JSON.stringify(c,null,2));"
       - name: Sync Capacitor Android
         run: npx cap sync android
       - name: Set up JDK 21
